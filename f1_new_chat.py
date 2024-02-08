@@ -12,7 +12,7 @@ def fetch_race_results(year):
     # Fetch data for each page until no more data is available
     page_num = 1
     while True:
-        response = requests.get(url, params={'limit': 100, 'offset': (page_num - 1) * 100})
+        response = requests.get(url, params={'limit': 200, 'offset': (page_num - 1) * 100})
         if response.status_code == 200:
             page_data = response.json()['MRData']['RaceTable']['Races']
             if not page_data:
