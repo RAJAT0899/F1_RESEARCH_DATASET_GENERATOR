@@ -2,6 +2,7 @@ import streamlit as st
 import pandas as pd
 import requests
 from datetime import datetime
+import base64
 
 # Function to fetch race results data from the F1 API
 def fetch_race_results(year):
@@ -23,6 +24,13 @@ def fetch_race_results(year):
     
     return all_results
 
+# Function to generate a download link for a DataFrame as a CSV file
+def download_link(df, filename, text):
+    csv = df.to_csv(index=False)
+    b64 = base64.b64encode(csv.encode()).decode()  # Encode CSV data as base64
+    href = f'<a href="data:file/csv;base64,{b64}" download="{filename}.csv">{text}</a>'
+    return href
+
 # Streamlit app
 def main():
     st.title("F1 Research Dataset Generator")
@@ -31,7 +39,7 @@ def main():
     year = st.number_input("Enter the year:", min_value=1950, max_value=2022, value=2021, step=1)
 
     # Button to trigger data download
-    if st.button("Download Dataset"):
+    if st.button("Generate Dataset"):
         race_results = fetch_race_results(year)
         
         if race_results:
@@ -59,12 +67,16 @@ def main():
                         'Points': points
                     })
             df = pd.DataFrame(data)
-            # Save data to CSV
-            df.to_csv(f"f1_dataset_{year}.csv", index=False)
             
-            st.success(f"Dataset downloaded successfully for {year}")
+            # Display the generated dataset
+            st.write(df)
+            
+            # Provide a download link for the generated dataset
+            st.markdown(download_link(df, f"f1_dataset_{year}", "Download Dataset"), unsafe_allow_html=True)
+            
+            st.success(f"Dataset generated successfully for {year}")
         else:
-            st.error("Failed to download dataset. Please try again.")
+            st.error("Failed to generate dataset. Please try again.")
 
 if __name__ == "__main__":
     main()
